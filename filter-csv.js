@@ -3,45 +3,65 @@ const fs = require('fs');
 
 const csvdir = '../charity-commission-extract/';
 
-const stdinBuffer = fs.readFileSync(csvdir+'extract_charity_clean.csv');
 
-const input = stdinBuffer.toString();
+const importCSV = fileName => {
+  const input = fs.readFileSync(csvdir+fileName);
+  return parse(
+    input.toString(),
+    { skip_empty_lines: true, trim: true, columns: true }
+  );
+};
 
-const charities = parse(input, {
-  columns: true,
-  skip_empty_lines: true
-}).filter(org => org.orgtype !== "RM") // filter out "removed" charities
-.map(org => { delete org.orgtype; return org }); // remove the orgtype field
+const makeObjectFrom = (array, keyName, outputKeyName) => {
+  const result = {};
+  array.forEach(el => {
+    const key = el[keyName];
+    if (!result[key]) {
+      result[key] = {};
+      result[key][outputKeyName] = [];
+    };
+    result[key][outputKeyName].push(el);
+  });
+  return result;
+};
+
+const charityData = {};
+
+const charities = importCSV('extract_charity_clean.csv')
+  .filter(org => org.orgtype !== 'RM') // filter out "removed" charities
+  .map(org => { delete org.orgtype; return org }); // remove the orgtype field
 
 
-// use charity number as array key
-let charitiesObj = {};
-charities.forEach(charity => {
-  if (!charitiesObj[charity.regno])
-    charitiesObj[charity.regno] = { linkedCharities: [] };
-  charitiesObj[charity.regno].linkedCharities.push(charity);
+charityData.charities = makeObjectFrom(charities, 'regno', 'linkedCharities');
+
+
+// add the classifications from extract_class and extract_class_ref
+
+const classDescsObj = {};
+
+importCSV('extract_class_ref_clean.csv').forEach(classDesc => {
+  classDescsObj[classDesc.classno] = classDesc.classtextn;
 });
 
-// Now we need to add the classifications from extract_class and extract_class_ref
-
-const classesInput = fs.readFileSync(csvdir+'extract_class_clean.csv');
-const classes = parse(
-  classesInput.toString(),
-  { columns: true, skip_empty_lines: true }
-);
-
-const classRefsInput = fs.readFileSync(csvdir+'extract_class_ref_clean.csv');
-const classRefs = parse(
-  classRefsInput.toString(),
-  { columns: true, skip_empty_lines: true }
-);
+importCSV('extract_class_clean.csv')
+  .forEach(class_ => {
+    const charity = charityData.charities[class_.regno];
+    if (charity) { // skip removed charities
+      if (!charity.classes) charity.classes = [];
+      charity.classes.push(classDescsObj[class_.classn]);
+    }
+  });
 
 
-classes.forEach(class_ => {
-  if (charitiesObj[class_.regno]) { // skip removed charities
-    if (!charitiesObj[class_.regno].classes) charitiesObj[class_.regno].classes = [];
-    charitiesObj[class_.regno].classes.push(class_.classn);
+// add the location information from extract_charity_aoo and extract_aoo_ref
+
+importCSV('extract_charity_aoo_clean.csv').forEach(aoo => {
+  const charity = charityData.charities[aoo.regno];
+  if (charity) {
+    if (!charity.aoo) charity.aoo = [];
+    charity.aoo.push(aoo);
   }
 });
 
-console.log(charitiesObj[200056]);
+
+console.log(JSON.stringify(charityData, null, 2));

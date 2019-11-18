@@ -100,6 +100,32 @@ importCSV('extract_charity_aoo_clean.csv').forEach(aoo => {
 });
 
 
+// charity objects
+
+
+importCSV('extract_objects_clean.csv').forEach(object => {
+  const charity = charityData.charities[object.regno];
+  if (charity) {
+    const subCharity = charity.linkedCharities.find(sub => sub.subno == object.subno);
+    if (subCharity) {
+      if (!subCharity.object) subCharity.object = {};
+      subCharity.object[object.seqno] = object.object.trim();
+    }
+  }
+});
+
+
+Object.values(charityData.charities).forEach(charity => {
+  charity.linkedCharities.forEach(subCharity => {
+    if (subCharity.object) {
+      let object = '';
+      Object.keys(subCharity.object).sort().forEach(key => {
+        object += subCharity.object[key] + ' ';
+      });
+      subCharity.object = object;
+    }
+  });
+});
 
 
 console.log(JSON.stringify(charityData, null, 2));

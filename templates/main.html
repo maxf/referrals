@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>Find a charity</title>
+  </head>
+  <body>
+    <h1>Find a charity</h1>
+
+    <form action="/">
+      <input name=q value="{{q}}" />
+    </form>
+
+
+    {% if results %}
+      <ul>
+        {% for r in results %}
+          {% set rs = r._source %}
+          {% set rlc0 = rs.linkedCharities[0] %}
+          <li>
+            <h2>{{ rlc0.name|capitalize }}</h2>
+            <p>{{ rlc0.object|capitalize }}</p>
+            {% if rs.classes %}
+              <ul>
+                {% for class in rs.classes %}
+                  <li>{{ class }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if rs.aoo %}
+              <h3>Operates in</h3>
+              <ul>
+                {% for aoo in rs.aoo %}
+                  <li>{{aoo[0].name}}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
+            {% if rlc0.add1 %}
+              <h3>Address</h3>
+              <p>
+                {{ rlc0.add1|capitalize }}<br/>
+                {% if rlc0.add2 %}{{ rlc0.add2|capitalize }}<br/>{% endif %}
+                {% if rlc0.add3 %}{{ rlc0.add3|capitalize }}<br/>{% endif %}
+                {% if rlc0.add4 %}{{ rlc0.add4|capitalize }}<br/>{% endif %}
+                {% if rlc0.add5 %}{{ rlc0.add5|capitalize }}<br/>{% endif %}
+                {% if rlc0.postcode %}{{ rlc0.postcode }}<br/>{% endif %}
+                {% if rlc0.phone %}{{ rlc0.phone }}<br/>{% endif %}
+              </p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+    {% endif %}
+
+  </body>
+</html>

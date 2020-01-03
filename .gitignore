@@ -1,4 +1,5 @@
 node_modules
 charities.json
-
-
+__pycache__
+*.pyc
+venv

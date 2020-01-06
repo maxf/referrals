@@ -40,6 +40,7 @@ const charities = importCSV('extract_charity_clean.csv')
     ['add1', 'add2', 'add3', 'add4', 'add5', 'name'].forEach(fieldName => {
       org[fieldName] = org[fieldName].trim();
     });
+    if (org.aob.toUpperCase() === 'NOT DEFINED') delete org.aob;
     return org;
   });
 

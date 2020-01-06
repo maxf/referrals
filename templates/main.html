@@ -21,13 +21,16 @@
             {% if rs.classes %}
               <ul>
                 {% for class in rs.classes %}
-                  <li>{{ class }}</li>
+                  <li>{{ class|capitalize }}</li>
                 {% endfor %}
               </ul>
             {% endif %}
-            {% if rs.aoo %}
+            {% if rs.aoo or rlc0.aob %}
               <h3>Operates in</h3>
               <ul>
+                {% if rlc0.aob %}
+                  <li>{{ rlc0.aob|capitalize }}</li>
+                {% endif %}
                 {% for aoo in rs.aoo %}
                   <li>{{aoo[0].name}}</li>
                 {% endfor %}

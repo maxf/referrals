@@ -4,10 +4,15 @@ app = Flask(__name__)
 import requests
 import logging
 import json
+import os
 
-es_base_url = 'http://0.0.0.0:9200/_search'
+es_base_url = os.getenv('ES_SERVER') + '/_search'
 
 logger = logging.getLogger('debug')
+
+logger.error("ES_SERVER:")
+logger.error(os.getenv('ES_SERVER'))
+
 
 
 def es_search(q):
@@ -31,4 +36,13 @@ def es_search(q):
 def main():
     q = request.args.get('q')
     r = es_search(q)
-    return render_template('main.html', results=r['hits']['hits'], q=q)
+    logger.error(r)
+    if 'hits' in r:
+        if 'hits' in r['hits']:
+            results = r['hits']['hits']
+        else:
+            results = []
+    else:
+        results = []
+
+    return render_template('main.html', results=results, q=q)

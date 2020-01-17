@@ -3,3 +3,4 @@ charities.json
 __pycache__
 *.pyc
 venv
+parts

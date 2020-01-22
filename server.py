@@ -15,8 +15,10 @@ logger.error(os.getenv('ES_SERVER'))
 
 
 
-def es_search(q):
+def es_search(q, first, size):
     body = {
+        "from": first,
+        "size": size,
         "query": {
             "multi_match" : {
                 "query": q,
@@ -35,10 +37,15 @@ def es_search(q):
 @app.route('/')
 def main():
     q = request.args.get('q', default='')
-    r = es_search(q)
+    first = int(request.args.get('p', default='0'))
+    first = max(0, first)
+    size = 10
+    r = es_search(q, first, size)
+    nbResults = 0
 
     logger.error(r)
     if 'hits' in r:
+        nbResults = r['hits']['total']['value']
         if 'hits' in r['hits']:
             results = r['hits']['hits']
         else:
@@ -46,4 +53,4 @@ def main():
     else:
         results = []
 
-    return render_template('main.html', results=results, q=q)
+    return render_template('main.html', results=results, q=q, nbResults=nbResults, first=int(first), last=min(nbResults, first+size), size=size)

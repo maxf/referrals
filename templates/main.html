@@ -3,7 +3,10 @@
     <title>Find a charity</title>
   </head>
   <body>
-    <style>html { font-family: sans-serif }</style>
+    <style>
+       html { font-family: sans-serif }
+       ul.results { list-style-type: none }
+    </style>
     <h1>Find a charity</h1>
 
     <form action="/">
@@ -14,12 +17,25 @@
 
 
     {% if results %}
-      <ul>
+      <p>
+        Showing {{ first + 1 }} - {{ last }} of {{ nbResults }} results
+        (<a
+          {% if first > 0 %}href="?q={{q}}&p={{first-size}}"{% endif %}
+        >previous page</a>
+        -
+        <a
+          {% if first+size < nbResults %}
+          href="?q={{q}}&p={{first+size}}"
+          {% endif %}
+        >next page</a>)
+      </p>
+
+      <ul class="results">
         {% for r in results %}
           {% set rs = r._source %}
           {% set rlc0 = rs.linkedCharities[0] %}
           <li>
-            <h2>{{ rlc0.name|capitalize }}</h2>
+            <h2>{{ loop.index }}. {{ rlc0.name|capitalize }}</h2>
             <p>{{ rlc0.object|capitalize }}</p>
             {% if rs.classes %}
               <ul>
@@ -53,9 +69,11 @@
               </p>
             {% endif %}
           </li>
+          <hr/>
         {% endfor %}
       </ul>
-
+    {% else %}
+      <p>No results</p>
     {% endif %}
 
   </body>

@@ -3,10 +3,13 @@
     <title>Find a charity</title>
   </head>
   <body>
+    <style>html { font-family: sans-serif }</style>
     <h1>Find a charity</h1>
 
     <form action="/">
-      <input name=q value="{{q}}" />
+      <label for=q>&#128269;</label>
+      <input name=q id=q value="{{q}}" />
+      <button type=submit>Search</button>
     </form>
 
 

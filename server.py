@@ -34,8 +34,9 @@ def es_search(q):
 
 @app.route('/')
 def main():
-    q = request.args.get('q')
+    q = request.args.get('q', default='')
     r = es_search(q)
+
     logger.error(r)
     if 'hits' in r:
         if 'hits' in r['hits']:
